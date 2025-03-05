@@ -2,7 +2,6 @@ package hu.webuni.webshop.userservice.security;
 
 import hu.webuni.webshop.userservice.dto.LoginDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,10 +20,10 @@ public class JwtLoginController {
     @Autowired
     JwtService jwtService;
 
-     @PostMapping("/api/login")
-     public String login(@RequestBody LoginDto loginDto) {
-         Authentication authentication = authenticationManager.authenticate(
-                 new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
-         return "\""+ jwtService.creatJwtToken((UserDetails)authentication.getPrincipal()) + "\"";
-     }
+    @PostMapping("/api/login")
+    public String login(@RequestBody LoginDto loginDto) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
+        return jwtService.createJwtToken((UserDetails) authentication.getPrincipal());
+    }
 }

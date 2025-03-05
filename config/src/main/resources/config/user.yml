@@ -1,12 +1,16 @@
 user:
   security:
     issuer: WebshopApp
+    secret: very_long_secret_key_to_use_across_all_services_for_webshop_app
+
 server:
   port: 8082
+
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8085/eureka/
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/webshop-kh-exam
@@ -19,3 +23,13 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: update
+
+  security:
+    oauth2:
+      client:
+        registration:
+          facebook:
+            client-id: 1577840669580004
+            secret: 1dff7c8d4671562cb4747b0403854145
+            scope: email,public_profile
+            redirect-uri: "http://localhost:8080/login/oauth2/code/facebook"

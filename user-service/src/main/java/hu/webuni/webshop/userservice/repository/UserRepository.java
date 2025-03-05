@@ -11,4 +11,6 @@ public interface UserRepository extends JpaRepository<WebshopUser, String> {
     Optional<WebshopUser> findByFacebookId(String facebookId);
 
     Optional<WebshopUser> findByUsername(String username);
+
+    Optional<WebshopUser> findByEmail(String email);
 }

@@ -20,8 +20,8 @@ public class UserServiceApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-     //  initDbService.deleteDb();
-       initDbService.addInitData();
+        initDbService.deleteDb();
+        initDbService.addInitData();
 
 
     }

@@ -1,6 +1,36 @@
+order:
+  security:
+    secret: very_long_secret_key_to_use_across_all_services_for_webshop_app
 server:
   port: 8084
+catalog:
+  service:
+    url: http://localhost:8080/catalog
 eureka:
    client:
      serviceUrl:
        defaultZone: http://localhost:8085/eureka/
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/webshop-kh-exam
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080
+
+  jpa:
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+#jms:
+#  pub-sub-domain: true
+
+logging:
+  level:
+    org.apache.activemq: ERROR
+    org.springframework.jms: ERROR

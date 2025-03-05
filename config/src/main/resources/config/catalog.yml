@@ -1,6 +1,47 @@
 server:
   port: 8083
+
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8085/eureka/
+
+spring:
+  cache:
+    type: infinispan
+    infinispan:
+      config: classpath:infinispan.xml
+  datasource:
+    url: jdbc:postgresql://localhost:5432/webshop-kh-exam
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      cache:
+        use_second_level_cache: true
+        region:
+          factory_class: infinispan
+        infinispan:
+          cfg: org/infinispan/hibernate/cache/commons/builder/infinispan-configs-local.xml
+          entity:
+            expiration:
+              max_idle: 30000
+      generate_statistics: false
+      dll-auto: none
+    properties:
+      jakarta:
+        persistence:
+          sharedCache:
+            mode: ENABLE_SELECTIVE
+          schema-generation:
+            create-source: metadata
+            scripts:
+              action: create
+              create-target: create.sql
+
+  flyway:
+    baseline-on-migrate: true

@@ -2,8 +2,13 @@ package hu.webuni.webshop.userservice.service;
 
 import hu.webuni.webshop.userservice.model.WebshopUser;
 import hu.webuni.webshop.userservice.repository.UserRepository;
+import hu.webuni.webshop.userservice.security.JwtService;
+import hu.webuni.webshop.userservice.security.WebshopUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -12,39 +17,32 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class UserService {
 
-    //   private final OAuth2AuthorizedClientService authClientService;
+    private final OAuth2AuthorizedClientService authClientService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final WebshopUserDetailsService webshopUserDetailsService;
 
-    /*
-        public void registerNewUserIfNeeded(OAuth2AuthenticationToken authenticationToken) {
-            String userId = authenticationToken.getName();
 
-            OAuth2User oauth2User = authenticationToken.getPrincipal();
-            System.out.println("FB id from oauth2User:" + oauth2User.getName());
-            Object email = oauth2User.getAttribute("email");
-            System.out.println("email:" + email);
-            System.out.println("full name:" + oauth2User.getAttribute("name"));
+    public String registerNewUserIfNeeded(OAuth2User oauthUser) {
+        String email = oauthUser.getAttribute("email");
+        String name = oauthUser.getAttribute("name");
 
-            String authorizedClientRegistrationId = authenticationToken.getAuthorizedClientRegistrationId(); //facebook, google, stb.
+        WebshopUser user = userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    WebshopUser newUser = new WebshopUser(email, email, name, Set.of("user"));
+                    return userRepository.save(newUser);
+                });
 
-            OAuth2AuthorizedClient client = authClientService.loadAuthorizedClient(authorizedClientRegistrationId, userId);
-            System.out.println("access token:" + client.getAccessToken().getTokenValue());
+        return jwtService.createJwtToken(webshopUserDetailsService.loadUserByUsername(user.getEmail()));
+    }
 
-            Optional<WebshopUser> optionalExistingUser = userRepository.findByFacebookId(userId);
-            if (optionalExistingUser.isEmpty()) {
-                WebshopUser newUser = new WebshopUser(email.toString(), "", email.toString(), Set.of("user"));
-                newUser.setFacebookId(userId);
-                userRepository.save(newUser);
-            }
-        }
-    */
     public void register(String email, String username, String password) {
         if (userRepository.findByUsername(username).isPresent()) {
             System.out.println("User already exists");
-        } else {
+            throw new RuntimeException("User already exists");
+        } else
             System.out.println("User created:" + userRepository.save(new WebshopUser(username, passwordEncoder.encode(password), email, Set.of("user"))));
-        }
 
     }
 }

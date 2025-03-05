@@ -24,7 +24,6 @@ public class WebshopUserDetailsService implements UserDetailsService {
         WebshopUser webshopUser = userRepository.findById(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
 
-
         return new User(username, webshopUser.getPassword(),
                 webshopUser.getRoles().stream().map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList()));

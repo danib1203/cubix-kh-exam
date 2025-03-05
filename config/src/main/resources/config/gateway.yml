@@ -5,6 +5,8 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8085/eureka/
 spring:
+  main:
+    web-application-type: reactive
   cloud:
     gateway:
       routes:
@@ -14,15 +16,31 @@ spring:
         - Path=/catalog/**
         filters:
         - RewritePath=/catalog(?<segment>/?.*), /api$\{segment}
+        - TokenRelay=
       - id: order
         uri: lb://order
         predicates:
           - Path=/order/**
         filters:
           - RewritePath=/order(?<segment>/?.*), /api$\{segment}
+          - TokenRelay=
       - id: user
         uri: lb://user
         predicates:
           - Path=/user/**
         filters:
           - RewritePath=/user(?<segment>/?.*), /api$\{segment}
+      - id: user-facebook-login
+        uri: lb://user
+        predicates:
+          - Path=/user/facebookLogin
+        filters:
+          - RewritePath=/user/facebookLogin, /login
+      - id: user-oauth2-callback
+        uri: lb://user
+        predicates:
+          - Path=/login/oauth2/code/facebook
+gateway:
+  security:
+    secret: very_long_secret_key_to_use_across_all_services_for_webshop_app
+    issuer: WebshopApp

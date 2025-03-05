@@ -1,7 +1,8 @@
 package hu.webuni.webshop.userservice.config;
 
 import hu.webuni.webshop.userservice.security.JwtAuthFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import hu.webuni.webshop.userservice.security.JwtService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,13 +21,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    UserDetailsService userDetailsService;
 
-    @Autowired
-    JwtAuthFilter jwtAuthFilter;
+    private final UserDetailsService userDetailsService;
+    private final JwtService jwtService;
+    private final JwtAuthFilter jwtAuthFilter;
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -48,15 +50,16 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/oauth2/**").permitAll()
+                        .requestMatchers("/api/fbLoginSuccess").permitAll()
                         .requestMatchers("/api/login").permitAll()
+                        .requestMatchers("/api/register").permitAll()
                         .anyRequest().authenticated()
                 )
-                /*
+
                 .oauth2Login(oAuth2Login -> oAuth2Login
-                        .defaultSuccessUrl("/fbLoginSuccess", true)
-                )
-                 */
-        ;
+                        .defaultSuccessUrl("/api/fbLoginSuccess", true)
+                );
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
