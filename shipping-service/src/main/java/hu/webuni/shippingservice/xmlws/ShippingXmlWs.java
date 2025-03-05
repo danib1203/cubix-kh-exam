@@ -7,5 +7,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 @WebService
 public interface ShippingXmlWs {
 
-    ShipmentDetailsDto createShipment(@RequestBody ShipmentDetailsDto shipmentDetailsDto);
+    ShipmentDetailsDto createShipment(@RequestBody ShipmentDetailsDto shipmentDetailsDto) throws ShipmentException;
 }

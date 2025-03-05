@@ -1,13 +1,16 @@
 package hu.webuni.webshop.orderservice.service;
 
-import feign.FeignException;
+import com.sun.xml.ws.fault.ServerSOAPFaultException;
 import hu.webuni.webshop.orderservice.dto.ProductDto;
 import hu.webuni.webshop.orderservice.dto.ShipmentDetailsDto;
 import hu.webuni.webshop.orderservice.dto.ShipmentItemsDto;
+import hu.webuni.webshop.orderservice.mapper.ShipmentDetailsMapper;
 import hu.webuni.webshop.orderservice.model.Order;
 import hu.webuni.webshop.orderservice.model.OrderItem;
 import hu.webuni.webshop.orderservice.repository.OrderItemRepository;
 import hu.webuni.webshop.orderservice.repository.OrderRepository;
+import hu.webuni.webshop.orderservice.wsclient.ShippingXmlWs;
+import hu.webuni.webshop.orderservice.wsclient.ShippingXmlWsImplService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -28,7 +31,7 @@ public class OrderService {
     private final CatalogServiceClient catalogServiceClient;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private final ShippingServiceClient shippingServiceClient;
+    private final ShipmentDetailsMapper shipmentDetailsMapper;
 
     @Transactional
     public Order createOrder(Order order, Jwt jwt) {
@@ -51,7 +54,6 @@ public class OrderService {
 
         return orderRepository.save(newOrder);
     }
-
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected List<OrderItem> verifyProductsById(List<OrderItem> orderItems, String jwt, Order order) {
@@ -91,7 +93,6 @@ public class OrderService {
         return verifiedItems;
     }
 
-
     @Transactional
     public List<Order> getOrdersByUsername(String username) {
         List<Order> orders = orderRepository.findByUsername(username);
@@ -101,7 +102,6 @@ public class OrderService {
         orders = orderRepository.findAllWithItems();
         return orders;
     }
-
 
     @Transactional
     public void updateOrderStatusAfterShipmentMessage(boolean isSuccess, long orderId) {
@@ -119,7 +119,7 @@ public class OrderService {
         Optional<Order> optionalOrder = orderRepository.findById(orderId);
 
         if (optionalOrder.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Order with id " + orderId + " not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order with id " + orderId + " not found");
         }
 
         Order order = optionalOrder.get();
@@ -132,18 +132,24 @@ public class OrderService {
             case 1:
                 order.setStatus(Order.OrderStatus.CONFIRMED);
                 ShipmentDetailsDto shipmentDetailsDto = createShipmentDtos(order);
-                try {
-                    shippingServiceClient.createShipment(shipmentDetailsDto);
-                } catch (FeignException.NotAcceptable e){
-                    throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Shipment failed");
-                }
+                callShippingService(shipmentDetailsDto);
+                break;
             case 2:
                 order.setStatus(Order.OrderStatus.DECLINED);
                 break;
             default:
-                throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Invalid status code. Only 1 (CONFIRMED) and 2 (DECLINED) are allowed)");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status code. Only 1 (CONFIRMED) and 2 (DECLINED) are allowed)");
         }
         return orderRepository.save(order);
+    }
+
+    private void callShippingService(ShipmentDetailsDto shipmentDetailsDto) {
+        ShippingXmlWs shippingXmlWsImplPort = new ShippingXmlWsImplService().getShippingXmlWsImplPort();
+        try {
+            shippingXmlWsImplPort.createShipment(shipmentDetailsMapper.dtoDetailsToWsclienDetailsDto(shipmentDetailsDto));
+        } catch (ServerSOAPFaultException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Shipment error");
+        }
     }
 
     private ShipmentDetailsDto createShipmentDtos(Order order) {

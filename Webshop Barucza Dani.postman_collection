@@ -1,0 +1,249 @@
+{
+	"info": {
+		"_postman_id": "2ea54ab8-871f-4a4a-a13e-163c37d0fc6b",
+		"name": "Webshop Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "33053552"
+	},
+	"item": [
+		{
+			"name": "login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let responseBody = pm.response.text();\r",
+							"pm.collectionVariables.set(\"jwt\", responseBody);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"pass\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/user/login"
+			},
+			"response": []
+		},
+		{
+			"name": "register",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"asd@email.com\",\r\n    \"username\": \"user\",\r\n    \"password\": \"pass\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/user/register"
+			},
+			"response": []
+		},
+		{
+			"name": "search product",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{jwt}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/catalog/product/search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"catalog",
+						"product",
+						"search"
+					],
+					"query": [
+						{
+							"key": "maxPrice",
+							"value": "75000",
+							"disabled": true
+						},
+						{
+							"key": "minPrice",
+							"value": "12000",
+							"disabled": true
+						},
+						{
+							"key": "categoryName",
+							"value": "cl",
+							"disabled": true
+						},
+						{
+							"key": "name",
+							"value": "ca",
+							"disabled": true
+						},
+						{
+							"key": "size",
+							"value": "1",
+							"disabled": true
+						},
+						{
+							"key": "page",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "sort",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete product",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "http://localhost:8080/catalog/product/103"
+			},
+			"response": []
+		},
+		{
+			"name": "history",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{jwt}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/catalog/product/priceHistory/103"
+			},
+			"response": []
+		},
+		{
+			"name": "create order",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 1,\r\n  \"username\": \"testUser\",\r\n  \"shippingAddress\": \"6666 Kecskemét\",\r\n  \"status\": \"PENDING\",\r\n  \"items\": [\r\n    {\r\n      \"id\": 0,\r\n      \"productId\": 122,\r\n      \"productName\": null,\r\n      \"productPriceInHuf\": null,\r\n      \"quantity\": 3,\r\n      \"order\": null\r\n    },\r\n    {\r\n      \"id\": 0,\r\n      \"productId\": 123,\r\n      \"productName\": null,\r\n      \"productPriceInHuf\": null,\r\n      \"quantity\": 5,\r\n      \"order\": null\r\n    }\r\n  ]\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/order/create"
+			},
+			"response": []
+		},
+		{
+			"name": "search by username",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/order/search/admin"
+			},
+			"response": []
+		},
+		{
+			"name": "get product by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/catalog/product/109"
+			},
+			"response": []
+		},
+		{
+			"name": "create shipment",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8090/api/shipping/create"
+			},
+			"response": []
+		},
+		{
+			"name": "changeOrderStatus",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/order/changeStatus/23?statusCode=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"order",
+						"changeStatus",
+						"23"
+					],
+					"query": [
+						{
+							"key": "statusCode",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

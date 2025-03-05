@@ -16,9 +16,12 @@ public class ShippingXmlWsImpl implements ShippingXmlWs {
     private ShipmentMapper shipmentMapper;
 
     @Override
-    public ShipmentDetailsDto createShipment(ShipmentDetailsDto shipmentDetailsDto) {
+    public ShipmentDetailsDto createShipment(ShipmentDetailsDto shipmentDetailsDto) throws ShipmentException {
         Shipment shipment = shipmentMapper.dtoToShipment(shipmentDetailsDto);
         Shipment createdShipment = shippingService.createShipment(shipment);
         return shipmentMapper.shipmentToDto(createdShipment);
     }
 }
+
+
+

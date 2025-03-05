@@ -12,6 +12,7 @@ public class OrderDto {
     private String shippingAddress;
     private OrderStatus status;
     private List<OrderItemDto> items;
+    private int version;
 
     public enum OrderStatus {
         PENDING,

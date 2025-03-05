@@ -5,8 +5,7 @@ import hu.webuni.shippingservice.model.Items;
 import hu.webuni.shippingservice.model.Shipment;
 import hu.webuni.shippingservice.repository.ItemsRepository;
 import hu.webuni.shippingservice.repository.ShippingDetailsRepository;
-import lombok.NoArgsConstructor;
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
+import hu.webuni.shippingservice.xmlws.ShipmentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
@@ -32,7 +31,7 @@ public class ShippingService {
 
 
     @Transactional
-    public Shipment createShipment(Shipment shipment) {
+    public Shipment createShipment(Shipment shipment) throws ShipmentException {
         if (Objects.isNull(shipment)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Shipment cannot be null");
         }
@@ -44,14 +43,14 @@ public class ShippingService {
         boolean isSuccess = random.nextBoolean();
         sendMessage(shipment.getOrderId(), isSuccess);
         if (!isSuccess) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Shipment failed");
+            throw new ShipmentException("Shipment failed");
         }
         Shipment savedShipment = shippingDetailsRepository.save(shipment);
 
         for (Items item : savedShipment.getItems()) {
             item.setShipment(savedShipment);
         }
-        return shippingDetailsRepository.save(shipment);
+        return shippingDetailsRepository.save(savedShipment);
     }
 
     @Async
